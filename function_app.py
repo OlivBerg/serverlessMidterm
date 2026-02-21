@@ -172,10 +172,11 @@ def analyze_colors(inputData: dict):
         # Get all pixels as a list of (R, G, B) tuples
         pixels = list(small_image.getdata())
 
-        # Count occurrences of each color (rounded to nearest 10 for grouping)
+        # Count occurrences of each color (rounded for grouping)
         color_counts = {}
         for r, g, b in pixels:
             # Round to nearest 32 to group similar colors together
+            # This reduces color space from 16M to ~32K colors for better grouping
             key = (r // 32 * 32, g // 32 * 32, b // 32 * 32)
             color_counts[key] = color_counts.get(key, 0) + 1
 
@@ -192,7 +193,11 @@ def analyze_colors(inputData: dict):
 
         # Determine if image is mostly grayscale
         # In grayscale images, R, G, and B values are very close to each other
-        grayscale_pixels = sum(1 for r, g, b in pixels if abs(r - g) < 30 and abs(g - b) < 30)
+        grayscale_threshold = 30
+        grayscale_pixels = sum(
+            1 for r, g, b in pixels 
+            if abs(r - g) < grayscale_threshold and abs(g - b) < grayscale_threshold and abs(r - b) < grayscale_threshold
+        )
         is_grayscale = grayscale_pixels / len(pixels) > 0.9
 
         return {
@@ -202,7 +207,7 @@ def analyze_colors(inputData: dict):
         }
 
     except Exception as e:
-        logging.error(f"Color analysis failed: {str(e)}")
+        logging.error(f"Color analysis failed: {str(e)}", exc_info=True)
         return {
             "dominantColors": [],
             "isGrayscale": False,
@@ -253,7 +258,7 @@ def analyze_objects(inputData: dict):
         }
 
     except Exception as e:
-        logging.error(f"Object analysis failed: {str(e)}")
+        logging.error(f"Object analysis failed: {str(e)}", exc_info=True)
         return {
             "objects": [],
             "objectCount": 0,
@@ -287,7 +292,7 @@ def analyze_text(inputData: dict):
         }
 
     except Exception as e:
-        logging.error(f"Text analysis failed: {str(e)}")
+        logging.error(f"Text analysis failed: {str(e)}", exc_info=True)
         return {
             "hasText": False,
             "extractedText": "",
@@ -343,7 +348,7 @@ def analyze_metadata(inputData: dict):
         }
 
     except Exception as e:
-        logging.error(f"Metadata analysis failed: {str(e)}")
+        logging.error(f"Metadata analysis failed: {str(e)}", exc_info=True)
         return {
             "width": 0,
             "height": 0,
@@ -432,7 +437,7 @@ def store_results(report: dict):
         }
 
     except Exception as e:
-        logging.error(f"Failed to store results: {str(e)}")
+        logging.error(f"Failed to store results: {str(e)}", exc_info=True)
         return {
             "id": report.get("id", "unknown"),
             "status": "error",
@@ -521,7 +526,7 @@ def get_results(req: func.HttpRequest) -> func.HttpResponse:
             )
 
     except Exception as e:
-        logging.error(f"Failed to retrieve results: {str(e)}")
+        logging.error(f"Failed to retrieve results: {str(e)}", exc_info=True)
         return func.HttpResponse(
             json.dumps({"error": str(e)}),
             mimetype="application/json",
