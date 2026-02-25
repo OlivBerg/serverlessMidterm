@@ -42,3 +42,18 @@ azurite --silent --location .azurite --debug .azurite/debug.log
 ```
 func start
 ```
+
+### local settings
+```
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "PDFStorageConnection": "UseDevelopmentStorage=true"
+  },
+  "Host": {
+    "CORS": "*"
+  }
+}
+```
