@@ -362,7 +362,7 @@ def store_results(report: dict):
         }
 
     except Exception as e:
-        logging.error(f"Failed to store results: {str(e)}")
+        logging.error(f"Failed to store results: {str(e)}", exc_info=True)
         return {
             "id": report.get("id", "unknown"),
             "status": "error",
@@ -446,7 +446,7 @@ def get_results(req: func.HttpRequest) -> func.HttpResponse:
             )
 
     except Exception as e:
-        logging.error(f"Failed to retrieve results: {str(e)}")
+        logging.error(f"Failed to retrieve results: {str(e)}", exc_info=True)
         return func.HttpResponse(
             json.dumps({"error": str(e)}),
             mimetype="application/json",
