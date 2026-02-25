@@ -46,9 +46,9 @@ def get_table_client():
 #   2. Azure detects the new blob and triggers this function
 #   3. This function starts the orchestrator, passing the blob name
 #
-# The path "images/{name}" means:
-#   - Watch the "images" container
-#   - {name} captures the filename (e.g., "photo.jpg")
+# The path "pdf/{name}" means:
+#   - Watch the "pdf" container
+#   - {name} captures the filename (e.g., "photo.pdf")
 @myApp.blob_trigger(
     arg_name="myblob",
     path="pdf/{name}",
@@ -56,9 +56,9 @@ def get_table_client():
 )
 @myApp.durable_client_input(client_name="client")
 async def blob_trigger(myblob: func.InputStream, client):
-    # Get the blob name (e.g., "images/photo.jpg")
+    # Get the blob name (e.g., "pdf/test.pdf")
     blob_name = myblob.name
-    # Read the blob content as bytes (the actual image data)
+    # Read the blob content as bytes (the actual pdf data)
     blob_bytes = myblob.read()
     # Get the file size in KB
     blob_size_kb = round(len(blob_bytes) / 1024, 2)
@@ -144,9 +144,15 @@ def pdf_analyzer_orchestrator(context):
     record = yield context.call_activity("store_results", report)
     return record
 
-# ACTIVITY: extract Text using py
+# ACTIVITY: extract Text using pypdf
 @myApp.activity_trigger(input_name="inputData")
 def extract_text(inputData: dict):
+    """
+     Extracts raw text content from a PDF file.
+     - Loads PDF bytes using PdfReader
+     - Iterates through each page and extracts text
+     - Returns combined text and a flag indicating whether text exists
+     """
     logging.info("Extracting text...")
     try:
         pdf_bytes = bytes(inputData["blob_bytes"])
@@ -177,6 +183,11 @@ def extract_text(inputData: dict):
 # ACTIVITY: Extract Metadata (Real Analysis)
 @myApp.activity_trigger(input_name="inputData")
 def extract_metadata(inputData: dict):
+    """
+       Extracts metadata from a PDF file.
+       - Reads document metadata fields such as title, author, creator, producer
+       - Converts date fields to ISO format
+       """
     logging.info("Extracting metadata...")
     try:
         pdf_bytes = bytes(inputData["blob_bytes"])
@@ -203,6 +214,13 @@ def extract_metadata(inputData: dict):
 # ACTIVITY: Analyze statistics (Real Analysis)
 @myApp.activity_trigger(input_name="inputData")
 def analyze_statistics(inputData: dict):
+    """
+        Performs statistical analysis on PDF text content.
+        - Counts pages
+        - Extracts all text and calculates total word count
+        - Computes average words per page
+        - Estimates reading time (200 words per minute)
+    """
     logging.info("Analyzing statistics...")
     try:
         pdf_bytes = bytes(inputData["blob_bytes"])
@@ -238,6 +256,11 @@ def analyze_statistics(inputData: dict):
 # ACTIVITY: Analyze statistics (Real Analysis)
 @myApp.activity_trigger(input_name="inputData")
 def detect_sensitive_data(inputData: dict):
+    """
+        Scans PDF text for sensitive information.
+        - Detects emails, phone numbers, URLs, and date formats
+        - Uses regular expressions for pattern matching
+    """
     logging.info("detecting sensitive data...")
     try:
         pdf_bytes = bytes(inputData["blob_bytes"])
@@ -288,12 +311,19 @@ def detect_sensitive_data(inputData: dict):
         }
 
 # =============================================================================
-# 7. ACTIVITY: Generate Report
+# ACTIVITY: Generate Report
 # =============================================================================
 # This activity takes the results from all 4 analyses and combines them
 # into a single unified report. This is the "reduce" step after the fan-in.
 @myApp.activity_trigger(input_name="reportData")
 def generate_report(reportData: dict):
+    """
+        Combines all analysis results into a single structured report.
+        - Generates a unique report ID
+        - Extracts filename from blob path
+        - Includes text, metadata, statistics, and sensitive data analysis
+        - Adds summary fields for quick lookup
+    """
     logging.info("Generating combined report...")
 
     blob_name = reportData["blob_name"]
@@ -330,6 +360,12 @@ def generate_report(reportData: dict):
 #   - RowKey: Unique identifier within the partition (we use the report ID)
 @myApp.activity_trigger(input_name="report")
 def store_results(report: dict):
+    """
+        Stores the final report into Azure Table Storage.
+        - Serializes nested objects into JSON strings (required by Table Storage)
+        - Uses PartitionKey + RowKey for indexing
+        - Returns storage status and summary
+    """
     logging.info(f"Storing results for {report['fileName']}...")
 
     try:
@@ -381,6 +417,12 @@ def store_results(report: dict):
 #   GET /api/results/{id}     - Get a specific result by ID
 @myApp.route(route="results/{id?}")
 def get_results(req: func.HttpRequest) -> func.HttpResponse:
+    """
+        HTTP endpoint for retrieving stored PDF analysis results.
+        - If ID is provided: return a single detailed report
+        - If no ID: return a list of recent reports (default limit = 10)
+        - Converts JSON strings back into Python objects
+    """
     logging.info("Get results endpoint called")
 
     try:
