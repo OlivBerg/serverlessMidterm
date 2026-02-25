@@ -4,7 +4,6 @@
 import azure.functions as func            # Azure Functions SDK
 import azure.durable_functions as df      # Durable Functions extension
 from azure.data.tables import TableServiceClient, TableClient  # Table Storage SDK
-from PIL import Image                     # Pillow - image processing library
 import logging                            # Python built-in logging
 import json                               # Python built-in JSON handling
 import io                                 # Python built-in for byte stream handling
@@ -379,7 +378,6 @@ def store_results(report: dict):
 #
 # Usage:
 #   GET /api/results          - Get all results (last 10)
-#   GET /api/results?limit=5  - Get last 5 results
 #   GET /api/results/{id}     - Get a specific result by ID
 @myApp.route(route="results/{id?}")
 def get_results(req: func.HttpRequest) -> func.HttpResponse:
