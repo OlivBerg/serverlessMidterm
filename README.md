@@ -1,5 +1,9 @@
 # Lab 2
 
+## Team Member
+
+Olivie Bergeron #41068227 - Initial repo and codebase setup, and demoed the local env and how it works
+
 ## Local Setup
 
 ### Step 1: Install or Update Azure Functions Core Tools
@@ -43,7 +47,10 @@ azurite --silent --location .azurite --debug .azurite/debug.log
 func start
 ```
 
+OR Press F5 key
+
 ### local settings
+
 ```
 {
   "IsEncrypted": false,
@@ -58,6 +65,8 @@ func start
 }
 ```
 
+## Youtube video
 
-## youtube video
+- Part 1: https://youtu.be/HDBiuC5psAU
+- Part 2:
 - Part 3: https://www.youtube.com/watch?v=4gEN4qbHRpQ
