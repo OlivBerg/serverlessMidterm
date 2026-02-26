@@ -3,6 +3,7 @@
 ## Team Member
 
 Olivie Bergeron #41068227 - Initial repo and codebase setup, and demoed the local env and how it works
+Trevor Kutto #041164341 - debugging of features and azure deployment
 
 ## Local Setup
 
@@ -68,5 +69,5 @@ OR Press F5 key
 ## Youtube video
 
 - Part 1: https://youtu.be/HDBiuC5psAU
-- Part 2:
+- Part 2:https://youtu.be/A0wTAFDp-B0
 - Part 3: https://www.youtube.com/watch?v=4gEN4qbHRpQ
