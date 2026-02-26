@@ -57,3 +57,7 @@ func start
   }
 }
 ```
+
+
+## youtube video
+- Part 3: https://www.youtube.com/watch?v=4gEN4qbHRpQ
