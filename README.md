@@ -6,6 +6,7 @@
 
 2. Trevor Kutto #041164341 - debugging of features and azure deployment
 
+3. Junfeng Rong #041176879 - Implement the durable function for uploading and analyzing PDF files.
 
 
 ## Local Setup
