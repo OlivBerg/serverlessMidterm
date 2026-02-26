@@ -3,6 +3,7 @@
 ## Team Member
 
 Olivie Bergeron #41068227 - Initial repo and codebase setup, and demoed the local env and how it works
+
 Trevor Kutto #041164341 - debugging of features and azure deployment
 
 ## Local Setup
